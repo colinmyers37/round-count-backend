@@ -3,7 +3,7 @@ import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
 export class SignUpDto {
   @IsNotEmpty({ message: 'Name cannot be empty' })
   @IsString({ message: 'Name must be a string' })
-  readonly name: string;
+  name: string;
 
   @IsNotEmpty({ message: 'Email cannot be empty' })
   @IsEmail({}, { message: 'Invalid email format' })
