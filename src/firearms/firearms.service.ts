@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { FirearmDto } from './dto/firearm.dto';
 import { Firearm } from './schema/firearm.schema';
-import { Model } from 'mongoose';
+import { Model, ObjectId } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
@@ -29,6 +29,28 @@ export class FirearmsService {
       return 'Firearm created successfully';
     } catch (error) {
       throw new Error('Failed to create firearm');
+    }
+  }
+
+  async getFirearmsByUserId(userId: ObjectId): Promise<FirearmDto[]> {
+    try {
+      const firearms = await this.firearmModel.find({ userId });
+
+      return firearms.map((firearm) => {
+        const { make, model, type, caliber, action, roundCount } = firearm;
+
+        return {
+          make,
+          model,
+          type,
+          caliber,
+          action,
+          roundCount,
+          userId: userId.toString(), // Convert ObjectId to string
+        };
+      });
+    } catch (error) {
+      throw new Error('Failed to get firearms');
     }
   }
 }
