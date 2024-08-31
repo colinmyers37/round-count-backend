@@ -1,9 +1,13 @@
 import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
 
 export class SignUpDto {
-  @IsNotEmpty({ message: 'Name cannot be empty' })
-  @IsString({ message: 'Name must be a string' })
-  name: string;
+  @IsNotEmpty({ message: 'First name cannot be empty' })
+  @IsString({ message: 'First name must be a string' })
+  firstName: string;
+
+  @IsNotEmpty({ message: 'Last name cannot be empty' })
+  @IsString({ message: 'Last name must be a string' })
+  lastName: string;
 
   @IsNotEmpty({ message: 'Email cannot be empty' })
   @IsEmail({}, { message: 'Invalid email format' })

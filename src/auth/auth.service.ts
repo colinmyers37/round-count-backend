@@ -8,6 +8,9 @@ import { SignUpDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 
 @Injectable()
+/**
+ * Service responsible for handling authentication operations.
+ */
 export class AuthService {
   constructor(
     @InjectModel(User.name)
@@ -16,10 +19,10 @@ export class AuthService {
   ) {}
 
   async signUp(signUpDto: SignUpDto): Promise<{ token: string }> {
-    const { name, email, password } = signUpDto;
+    const { firstName, lastName, email, password } = signUpDto;
 
     // Validate input
-    if (!name || !email || !password) {
+    if (!firstName || !lastName || !email || !password) {
       throw new UnauthorizedException('Invalid input');
     }
     // Check if email already exists
@@ -30,7 +33,8 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await this.userModel.create({
-      name,
+      firstName,
+      lastName,
       email,
       password: hashedPassword,
     });
