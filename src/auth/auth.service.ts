@@ -18,6 +18,15 @@ export class AuthService {
   async signUp(signUpDto: SignUpDto): Promise<{ token: string }> {
     const { name, email, password } = signUpDto;
 
+    // Validate input
+    if (!name || !email || !password) {
+      throw new UnauthorizedException('Invalid input');
+    }
+    // Check if email already exists
+    const existingUser = await this.userModel.findOne({ email });
+    if (existingUser) {
+      throw new UnauthorizedException('Email already exists');
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await this.userModel.create({
@@ -33,6 +42,11 @@ export class AuthService {
 
   async login(loginDto: LoginDto): Promise<{ token: string }> {
     const { email, password } = loginDto;
+
+    // Validate input
+    if (!email || !password) {
+      throw new UnauthorizedException('Invalid input');
+    }
 
     const user = await this.userModel.findOne({ email });
 
