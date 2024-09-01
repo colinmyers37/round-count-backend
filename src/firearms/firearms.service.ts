@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { FirearmDto } from './dto/firearm.dto';
 import { Firearm } from './schema/firearm.schema';
-import { Model, ObjectId } from 'mongoose';
+import { Model, ObjectId, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
@@ -13,8 +13,17 @@ export class FirearmsService {
 
   async createFirearm(firearmDto: FirearmDto): Promise<string> {
     try {
-      const { make, model, type, caliber, action, roundCount, userId } =
-        firearmDto;
+      const {
+        make,
+        model,
+        type,
+        caliber,
+        action,
+        roundCount,
+        userId,
+        lastCleanedDate,
+        reminderInterval,
+      } = firearmDto;
 
       await this.firearmModel.create({
         make,
@@ -24,6 +33,8 @@ export class FirearmsService {
         roundCount: roundCount || 0,
         ...(type && { type }),
         ...(caliber && { caliber }),
+        ...(lastCleanedDate && { lastCleanedDate }),
+        ...(reminderInterval && { reminderInterval }),
       });
 
       return 'Firearm created successfully';
@@ -37,20 +48,43 @@ export class FirearmsService {
       const firearms = await this.firearmModel.find({ userId });
 
       return firearms.map((firearm) => {
-        const { make, model, type, caliber, action, roundCount } = firearm;
-
-        return {
+        const {
+          _id,
           make,
           model,
           type,
           caliber,
           action,
           roundCount,
+          lastCleanedDate,
+          reminderInterval,
+        } = firearm;
+
+        return {
+          _id: _id.toString(), // Convert ObjectId to string
+          make,
+          model,
+          type,
+          caliber,
+          action,
+          roundCount,
+          reminderInterval,
+          lastCleanedDate,
           userId: userId.toString(), // Convert ObjectId to string
         };
       });
     } catch (error) {
       throw new Error('Failed to get firearms');
+    }
+  }
+
+  async deleteFirearmById(firearmId: Types.ObjectId): Promise<string> {
+    try {
+      await this.firearmModel.findByIdAndDelete(firearmId);
+
+      return 'Firearm deleted successfully';
+    } catch (error) {
+      throw new Error('Failed to delete firearm');
     }
   }
 }

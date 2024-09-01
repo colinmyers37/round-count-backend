@@ -23,6 +23,12 @@ export class Firearm {
   @Prop()
   roundCount: number;
 
+  @Prop({ type: Date, default: Date.now })
+  lastCleanedDate: Date;
+
+  @Prop({ type: Number, default: 30 }) // default reminder interval in days
+  reminderInterval: number;
+
   @Prop({ type: 'ObjectId', ref: 'User' })
   userId: Types.ObjectId;
 }
