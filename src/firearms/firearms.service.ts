@@ -61,7 +61,7 @@ export class FirearmsService {
         } = firearm;
 
         return {
-          _id: _id.toString(), // Convert ObjectId to string
+          _id: _id.toString(),
           make,
           model,
           type,
@@ -70,7 +70,7 @@ export class FirearmsService {
           roundCount,
           reminderInterval,
           lastCleanedDate,
-          userId: userId.toString(), // Convert ObjectId to string
+          userId: userId.toString(),
         };
       });
     } catch (error) {

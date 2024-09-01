@@ -36,13 +36,12 @@ export class FirearmDto {
   @IsString()
   userId: string;
 
-  // New fields for cleaning reminders
   @IsOptional()
   @IsDate({ message: 'Last cleaned date must be a valid date' })
-  lastCleanedDate?: Date; // Optional field for the last cleaned date
+  lastCleanedDate?: Date;
 
   @IsOptional()
   @IsNumber({}, { message: 'Reminder interval must be a number' })
   @Min(1, { message: 'Reminder interval must be at least 1 day' })
-  reminderInterval?: number; // Optional field for reminder interval in days
+  reminderInterval?: number;
 }

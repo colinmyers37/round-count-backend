@@ -26,7 +26,7 @@ export class Firearm {
   @Prop({ type: Date, default: Date.now })
   lastCleanedDate: Date;
 
-  @Prop({ type: Number, default: 30 }) // default reminder interval in days
+  @Prop({ type: Number, default: 30 })
   reminderInterval: number;
 
   @Prop({ type: 'ObjectId', ref: 'User' })
