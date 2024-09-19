@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Model } from 'mongoose';
 import { User } from './schema/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
@@ -23,14 +28,16 @@ export class AuthService {
 
     // Validate input
     if (!firstName || !lastName || !email || !password) {
-      throw new UnauthorizedException('Invalid input');
+      throw new BadRequestException('All fields are required');
     }
+
     // Check if email already exists
     const existingUser = await this.userModel.findOne({ email });
     if (existingUser) {
-      throw new UnauthorizedException('Email already exists');
+      throw new BadRequestException('Email already exists');
     }
-    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const hashedPassword = await this.hashPassword(password);
 
     const user = await this.userModel.create({
       firstName,
@@ -39,33 +46,52 @@ export class AuthService {
       password: hashedPassword,
     });
 
-    const token = this.jwtService.sign({ id: user._id });
-
-    return { token };
+    return this.generateToken(user._id.toString());
   }
 
   async login(loginDto: LoginDto): Promise<{ token: string }> {
     const { email, password } = loginDto;
-
     // Validate input
     if (!email || !password) {
-      throw new UnauthorizedException('Invalid input');
+      throw new BadRequestException('Email and password are required');
     }
 
     const user = await this.userModel.findOne({ email });
 
-    if (!user) {
+    if (!user || !(await this.verifyPassword(password, user.password))) {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const isPasswordMatched = await bcrypt.compare(password, user.password);
+    return this.generateToken(user._id.toString());
+  }
 
-    if (!isPasswordMatched) {
-      throw new UnauthorizedException('Invalid email or password');
+  async deleteUser(userId: string): Promise<{ message: string }> {
+    if (!userId || typeof userId !== 'string') {
+      throw new BadRequestException('Valid user ID is required');
     }
 
-    const token = this.jwtService.sign({ id: user._id });
+    const result = await this.userModel.findByIdAndDelete(userId).exec();
 
+    if (!result) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    return { message: 'User deleted successfully' };
+  }
+
+  private async hashPassword(password: string): Promise<string> {
+    return bcrypt.hash(password, 10);
+  }
+
+  private async verifyPassword(
+    plainTextPassword: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
+    return bcrypt.compare(plainTextPassword, hashedPassword);
+  }
+
+  private generateToken(userId: string): { token: string } {
+    const token = this.jwtService.sign({ id: userId });
     return { token };
   }
 }
