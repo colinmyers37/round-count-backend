@@ -1,4 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { FirearmDto } from './dto/firearm.dto';
 import { Firearm } from './schema/firearm.schema';
 import { Model, ObjectId, Types } from 'mongoose';
@@ -6,6 +11,8 @@ import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class FirearmsService {
+  private readonly logger = new Logger(FirearmsService.name);
+
   constructor(
     @InjectModel(Firearm.name)
     private firearmModel: Model<Firearm>,
@@ -13,78 +20,80 @@ export class FirearmsService {
 
   async createFirearm(firearmDto: FirearmDto): Promise<string> {
     try {
-      const {
-        make,
-        model,
-        type,
-        caliber,
-        action,
-        roundCount,
-        userId,
-        lastCleanedDate,
-        reminderInterval,
-      } = firearmDto;
-
-      await this.firearmModel.create({
-        make,
-        model,
-        userId,
-        ...(action && { action }),
-        roundCount: roundCount || 0,
-        ...(type && { type }),
-        ...(caliber && { caliber }),
-        ...(lastCleanedDate && { lastCleanedDate }),
-        ...(reminderInterval && { reminderInterval }),
-      });
-
+      const newFirearm = new this.firearmModel(firearmDto);
+      await newFirearm.save();
+      this.logger.log(`Firearm created: ${newFirearm._id}`);
       return 'Firearm created successfully';
     } catch (error) {
-      throw new Error('Failed to create firearm');
+      this.logger.error(`Failed to create firearm: ${error.message}`);
+      throw new BadRequestException('Failed to create firearm');
     }
   }
 
-  async getFirearmsByUserId(userId: ObjectId): Promise<FirearmDto[]> {
+  async getFirearmsByUserId(
+    userId: ObjectId,
+    page = 1,
+    limit = 10,
+  ): Promise<{ firearms: FirearmDto[]; total: number }> {
     try {
-      const firearms = await this.firearmModel.find({ userId });
+      const [firearms, total] = await Promise.all([
+        this.firearmModel
+          .find({ userId })
+          .lean()
+          .skip((page - 1) * limit)
+          .limit(limit)
+          .exec(),
+        this.firearmModel.countDocuments({ userId }),
+      ]);
 
-      return firearms.map((firearm) => {
-        const {
-          _id,
-          make,
-          model,
-          type,
-          caliber,
-          action,
-          roundCount,
-          lastCleanedDate,
-          reminderInterval,
-        } = firearm;
-
-        return {
-          _id: _id.toString(),
-          make,
-          model,
-          type,
-          caliber,
-          action,
-          roundCount,
-          reminderInterval,
-          lastCleanedDate,
+      return {
+        firearms: firearms.map((firearm) => ({
+          ...firearm,
+          _id: firearm._id.toString(),
           userId: userId.toString(),
-        };
-      });
+        })),
+        total,
+      };
     } catch (error) {
-      throw new Error('Failed to get firearms');
+      this.logger.error(`Failed to get firearms: ${error.message}`);
+      throw new BadRequestException('Failed to get firearms');
     }
   }
 
   async deleteFirearmById(firearmId: Types.ObjectId): Promise<string> {
     try {
-      await this.firearmModel.findByIdAndDelete(firearmId);
-
+      const result = await this.firearmModel.findByIdAndDelete(firearmId);
+      if (!result) {
+        throw new NotFoundException('Firearm not found');
+      }
+      this.logger.log(`Firearm deleted: ${firearmId}`);
       return 'Firearm deleted successfully';
     } catch (error) {
-      throw new Error('Failed to delete firearm');
+      this.logger.error(`Failed to delete firearm: ${error.message}`);
+      throw new BadRequestException('Failed to delete firearm');
+    }
+  }
+
+  async updateFirearm(
+    firearmId: Types.ObjectId,
+    firearmDto: FirearmDto,
+  ): Promise<string> {
+    try {
+      const updatedFirearm = await this.firearmModel.findByIdAndUpdate(
+        firearmId,
+        { $set: firearmDto },
+        { new: true },
+      );
+
+      if (!updatedFirearm) {
+        throw new NotFoundException('Firearm not found');
+      }
+
+      this.logger.log(`Firearm updated: ${firearmId}`);
+      return 'Firearm updated successfully';
+    } catch (error) {
+      this.logger.error(`Failed to update firearm: ${error.message}`);
+      throw new BadRequestException('Failed to update firearm');
     }
   }
 }

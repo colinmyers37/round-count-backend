@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import { FirearmsService } from './firearms.service';
@@ -23,7 +24,9 @@ export class FirearmsController {
   }
 
   @Get('/userId')
-  getFirearm(@Query('userId') userId: ObjectId): Promise<FirearmDto[]> {
+  getFirearm(
+    @Query('userId') userId: ObjectId,
+  ): Promise<{ firearms: FirearmDto[]; total: number }> {
     return this.firearmsService.getFirearmsByUserId(userId);
   }
 
@@ -46,5 +49,14 @@ export class FirearmsController {
     }
 
     return 'Firearm successfully deleted';
+  }
+
+  @Put(':firearmId')
+  async updateFirearm(
+    @Param('firearmId') firearmId: string,
+    @Body() firearmDto: FirearmDto,
+  ): Promise<string> {
+    const objectId = new Types.ObjectId(firearmId);
+    return this.firearmsService.updateFirearm(objectId, firearmDto);
   }
 }
