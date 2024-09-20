@@ -11,6 +11,8 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { SignUpDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
+import * as crypto from 'crypto';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 /**
@@ -21,6 +23,7 @@ export class AuthService {
     @InjectModel(User.name)
     private userModel: Model<User>,
     private jwtService: JwtService,
+    private emailService: EmailService,
   ) {}
 
   async signUp(signUpDto: SignUpDto): Promise<{ token: string }> {
@@ -77,6 +80,31 @@ export class AuthService {
     }
 
     return { message: 'User deleted successfully' };
+  }
+
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const hashedResetToken = await bcrypt.hash(resetToken, 10);
+
+    const expirationTime = new Date();
+    expirationTime.setHours(expirationTime.getHours() + 1);
+
+    user.resetPasswordToken = hashedResetToken;
+    user.resetPasswordExpires = expirationTime;
+    await user.save();
+
+    console.log(
+      `Sending reset token for email: ${email}, token: ${resetToken}`,
+    );
+    // Use EmailService to send the reset email
+    // await this.emailService.sendPasswordResetEmail(email, resetToken);
+
+    return { message: 'Password reset instructions sent to your email' };
   }
 
   private async hashPassword(password: string): Promise<string> {

@@ -6,6 +6,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { config } from 'dotenv';
 import { AuthService } from './auth.service';
+import { EmailModule } from '../email/email.module';
 config();
 
 @Module({
@@ -18,6 +19,7 @@ config();
       }),
     }),
     MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
+    EmailModule,
   ],
   controllers: [AuthController],
   providers: [AuthService],

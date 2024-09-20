@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { FirearmsModule } from './firearms/firearms.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { config } from 'dotenv';
+import { EmailModule } from './email/email.module';
 config();
 
 if (!process.env.DB_URI) {
@@ -16,6 +17,7 @@ if (!process.env.DB_URI) {
     MongooseModule.forRoot(process.env.DB_URI),
     AuthModule,
     FirearmsModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

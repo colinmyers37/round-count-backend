@@ -31,4 +31,11 @@ export class AuthController {
   deleteUser(@Body('userId') userId: string): Promise<{ message: string }> {
     return this.authService.deleteUser(userId);
   }
+  @Post('/forgot-password')
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(
+    @Body('email') email: string,
+  ): Promise<{ message: string }> {
+    return this.authService.forgotPassword(email);
+  }
 }
