@@ -14,6 +14,7 @@ import { LoginDto } from './dto/login.dto';
 import * as crypto from 'crypto';
 import { EmailService } from '../email/email.service';
 
+//test commit
 @Injectable()
 /**
  * Service responsible for handling authentication operations.
