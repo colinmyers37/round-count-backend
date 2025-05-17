@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Put,
   Body,
   UseGuards,
@@ -21,6 +22,27 @@ export class UserProfileController {
       return await this.userProfileService.getProfile(req.user.id);
     } catch (error) {
       throw new BadRequestException('Failed to get profile');
+    }
+  }
+
+  @Post()
+  async createProfile(@Request() req) {
+    try {
+      return await this.userProfileService.createProfile(req.user.id);
+    } catch (error) {
+      throw new BadRequestException('Failed to create profile');
+    }
+  }
+
+  @Put()
+  async updateProfile(@Request() req, @Body() updateData: any) {
+    try {
+      return await this.userProfileService.updateProfile(
+        req.user.id,
+        updateData,
+      );
+    } catch (error) {
+      throw new BadRequestException('Failed to update profile');
     }
   }
 

@@ -98,7 +98,7 @@ This collection will be used to record and schedule firearm maintenance:
 | PUT    | `/firearm/:firearmId` | Update firearm details         |
 | DELETE | `/firearm/:firearmId` | Delete a firearm              |
 
-### 👤 UserProfile (Planned Feature)
+### 👤 UserProfile
 
 | Method | Endpoint            | Description                          |
 |--------|---------------------|--------------------------------------|
