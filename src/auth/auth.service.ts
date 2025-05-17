@@ -13,6 +13,7 @@ import { SignUpDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import * as crypto from 'crypto';
 import { EmailService } from '../email/email.service';
+import { UserProfileService } from '../user-profile/user-profile.service';
 
 //test commit
 @Injectable()
@@ -24,6 +25,7 @@ export class AuthService {
     @InjectModel(User.name) private userModel: Model<User>,
     private jwtService: JwtService,
     private emailService: EmailService,
+    private userProfileService: UserProfileService,
   ) {}
 
   async signUp(signUpDto: SignUpDto): Promise<{ token: string }> {
@@ -39,6 +41,9 @@ export class AuthService {
       email,
       hashedPassword,
     );
+
+    // Create user profile after successful user creation
+    await this.userProfileService.createProfile(user._id);
 
     return this.generateToken(user._id.toString());
   }

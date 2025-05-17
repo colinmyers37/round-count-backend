@@ -7,6 +7,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { config } from 'dotenv';
 import { AuthService } from './auth.service';
 import { EmailModule } from '../email/email.module';
+import { UserProfileModule } from '../user-profile/user-profile.module';
+
 config();
 
 @Module({
@@ -20,6 +22,7 @@ config();
     }),
     MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
     EmailModule,
+    UserProfileModule,
   ],
   controllers: [AuthController],
   providers: [AuthService],

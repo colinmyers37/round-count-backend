@@ -1,74 +1,170 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# 🔫 ROUND App Backend (NestJS + MongoDB)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+**ROUND** is a mobile and web application designed to help responsible firearm owners keep track of their equipment. It allows users to log rounds fired, track firearm maintenance, and manage their personal firearm inventory.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+This backend is built using **NestJS** and **MongoDB**, with a RESTful API architecture.
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 📁 Collections Overview
 
-## Installation
+### 1. Users
+
+This collection stores user information including:
+- First Name
+- Last Name
+- Email (unique)
+- Password (hashed)
+- Reset Password Token
+- Reset Password Expiration
+- Timestamps (createdAt, updatedAt)
+
+### 2. Firearms
+
+The firearms collection contains details about each user's firearms:
+- Make
+- Model
+- Type
+- Caliber
+- Action
+- Round Count
+- Last Cleaned Date
+- Reminder Interval
+- User ID (reference to Users collection)
+- Timestamps (createdAt, updatedAt)
+
+### 3. UserProfile (Planned Feature)
+
+This collection will store user dashboard and profile information:
+- User ID (reference to Users collection)
+- Total Rounds Fired
+- Total Firearms
+- Last Range Visit
+- Preferred Range
+- Favorite Firearms (array of Firearm references)
+- Recent Activities
+- Statistics
+  - Monthly Rounds
+  - Yearly Rounds
+  - Maintenance Due
+- Preferences
+  - Default View
+  - Notifications
+  - Theme
+- Timestamps (createdAt, updatedAt)
+
+### 4. Rounds Log (Planned Feature)
+
+This collection will track shooting sessions. It will log:
+- Number of rounds fired
+- Date
+- Ammo type
+- Location
+- Additional notes
+- User ID (reference to Users collection)
+- Firearm ID (reference to Firearms collection)
+- Timestamps (createdAt, updatedAt)
+
+### 5. Maintenance Log (Planned Feature)
+
+This collection will be used to record and schedule firearm maintenance:
+- Type of maintenance (cleaning, inspection, etc.)
+- Date
+- Notes
+- Status (completed/scheduled)
+- User ID (reference to Users collection)
+- Firearm ID (reference to Firearms collection)
+- Timestamps (createdAt, updatedAt)
+
+---
+
+## 🌐 REST API Endpoints
+
+### 🔐 Auth & User
+
+| Method | Endpoint            | Description                          |
+|--------|---------------------|--------------------------------------|
+| POST   | `/auth/signup`      | Register a new user                  |
+| POST   | `/auth/login`       | Authenticate and receive JWT token   |
+| DELETE | `/auth/delete`      | Delete a user account                |
+| POST   | `/auth/forgot-password` | Request password reset email     |
+
+### 🔫 Firearms
+
+| Method | Endpoint          | Description                        |
+|--------|-------------------|------------------------------------|
+| POST   | `/firearm/create` | Add a new firearm                  |
+| GET    | `/firearm/userId` | Get all firearms for a user        |
+| PUT    | `/firearm/:firearmId` | Update firearm details         |
+| DELETE | `/firearm/:firearmId` | Delete a firearm              |
+
+### 👤 UserProfile (Planned Feature)
+
+| Method | Endpoint            | Description                          |
+|--------|---------------------|--------------------------------------|
+| GET    | `/profile`          | Get user's profile information       |
+| POST   | `/profile`          | Create user profile                  |
+| PUT    | `/profile`          | Update user profile                  |
+| GET    | `/profile/stats`    | Get user statistics                  |
+| PUT    | `/profile/preferences` | Update user preferences         |
+
+### 📊 Rounds Log (Planned Feature)
+
+| Method | Endpoint            | Description                          |
+|--------|---------------------|--------------------------------------|
+| GET    | `/rounds-log`       | Get all rounds fired logs            |
+| POST   | `/rounds-log`       | Add a new rounds fired entry         |
+| GET    | `/rounds-log/:id`   | Get a specific round log entry       |
+| PUT    | `/rounds-log/:id`   | Update a round log entry             |
+| DELETE | `/rounds-log/:id`   | Delete a round log entry             |
+
+### 🧰 Maintenance Log (Planned Feature)
+
+| Method | Endpoint                 | Description                            |
+|--------|--------------------------|----------------------------------------|
+| GET    | `/maintenance-log`       | Get all maintenance entries            |
+| POST   | `/maintenance-log`       | Add a new maintenance entry            |
+| GET    | `/maintenance-log/:id`   | Get a specific maintenance entry       |
+| PUT    | `/maintenance-log/:id`   | Update a maintenance entry             |
+| DELETE | `/maintenance-log/:id`   | Delete a maintenance entry             |
+
+---
+
+## ⚙️ Tech Stack
+
+- **Backend Framework:** NestJS
+- **Database:** MongoDB
+- **Authentication:** JWT-based
+- **Validation:** DTOs using `class-validator`
+- **Email Service:** Integrated for password reset functionality
+
+---
+
+## 🛠️ Getting Started
+
+### 📦 Install dependencies
 
 ```bash
-$ npm install
+npm install
 ```
 
-## Running the app
+### 🔧 Environment Variables
+
+Create a `.env` file in the root directory with the following variables:
+```
+DB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRE=your_jwt_expiration_time
+```
+
+### 🚀 Running the Application
 
 ```bash
-# development
-$ npm run start
+# Development
+npm run start
 
-# watch mode
-$ npm run start:dev
+# Watch mode
+npm run start:dev
 
-# production mode
-$ npm run start:prod
-```
-
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
-# round-count-backend
+# Production
+npm run start:prod
