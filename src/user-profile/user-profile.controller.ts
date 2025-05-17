@@ -5,7 +5,6 @@ import {
   Put,
   Body,
   UseGuards,
-  Request,
   BadRequestException,
 } from '@nestjs/common';
 import { UserProfileService } from './user-profile.service';
@@ -17,39 +16,49 @@ export class UserProfileController {
   constructor(private readonly userProfileService: UserProfileService) {}
 
   @Get()
-  async getProfile(@Request() req) {
+  async getProfile(@Body('userId') userId: string) {
     try {
-      return await this.userProfileService.getProfile(req.user.id);
+      if (!userId) {
+        throw new BadRequestException('userId is required');
+      }
+      return await this.userProfileService.getProfile(userId);
     } catch (error) {
       throw new BadRequestException('Failed to get profile');
     }
   }
 
   @Post()
-  async createProfile(@Request() req) {
+  async createProfile(@Body('userId') userId: string) {
     try {
-      return await this.userProfileService.createProfile(req.user.id);
+      if (!userId) {
+        throw new BadRequestException('userId is required');
+      }
+      return await this.userProfileService.createProfile(userId);
     } catch (error) {
       throw new BadRequestException('Failed to create profile');
     }
   }
 
   @Put()
-  async updateProfile(@Request() req, @Body() updateData: any) {
+  async updateProfile(@Body() updateData: any) {
     try {
-      return await this.userProfileService.updateProfile(
-        req.user.id,
-        updateData,
-      );
+      const { userId, ...data } = updateData;
+      if (!userId) {
+        throw new BadRequestException('userId is required');
+      }
+      return await this.userProfileService.updateProfile(userId, data);
     } catch (error) {
       throw new BadRequestException('Failed to update profile');
     }
   }
 
   @Get('stats')
-  async getStatistics(@Request() req) {
+  async getStatistics(@Body('userId') userId: string) {
     try {
-      const profile = await this.userProfileService.getProfile(req.user.id);
+      if (!userId) {
+        throw new BadRequestException('userId is required');
+      }
+      const profile = await this.userProfileService.getProfile(userId);
       return profile.statistics;
     } catch (error) {
       throw new BadRequestException('Failed to get statistics');
@@ -57,9 +66,12 @@ export class UserProfileController {
   }
 
   @Get('preferences')
-  async getPreferences(@Request() req) {
+  async getPreferences(@Body('userId') userId: string) {
     try {
-      const profile = await this.userProfileService.getProfile(req.user.id);
+      if (!userId) {
+        throw new BadRequestException('userId is required');
+      }
+      const profile = await this.userProfileService.getProfile(userId);
       return profile.preferences;
     } catch (error) {
       throw new BadRequestException('Failed to get preferences');
@@ -67,10 +79,14 @@ export class UserProfileController {
   }
 
   @Put('preferences')
-  async updatePreferences(@Request() req, @Body() preferences: any) {
+  async updatePreferences(@Body() data: any) {
     try {
+      const { userId, ...preferences } = data;
+      if (!userId) {
+        throw new BadRequestException('userId is required');
+      }
       return await this.userProfileService.updatePreferences(
-        req.user.id,
+        userId,
         preferences,
       );
     } catch (error) {

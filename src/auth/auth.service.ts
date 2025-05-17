@@ -43,7 +43,7 @@ export class AuthService {
     );
 
     // Create user profile after successful user creation
-    await this.userProfileService.createProfile(user._id);
+    await this.userProfileService.createProfile(user._id.toString());
 
     return this.generateToken(user._id.toString());
   }
@@ -97,7 +97,7 @@ export class AuthService {
   }
 
   private generateToken(userId: string): { token: string } {
-    const token = this.jwtService.sign({ id: userId });
+    const token = this.jwtService.sign({ sub: userId });
     return { token };
   }
 

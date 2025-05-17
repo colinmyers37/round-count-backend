@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { UserProfile } from './schema/user-profile.schema';
@@ -10,25 +10,36 @@ export class UserProfileService {
     private userProfileModel: Model<UserProfile>,
   ) {}
 
-  async createProfile(userId: Types.ObjectId): Promise<UserProfile> {
-    const profile = new this.userProfileModel({
-      userId,
-      // All other fields will use their default values
+  async createProfile(userId: string): Promise<UserProfile> {
+    const profile = await this.userProfileModel.create({
+      userId: new Types.ObjectId(userId),
     });
-    return profile.save();
+    return profile;
   }
 
-  async getProfile(userId: Types.ObjectId): Promise<UserProfile> {
-    return this.userProfileModel.findOne({ userId }).exec();
+  async getProfile(userId: string): Promise<UserProfile> {
+    const profile = await this.userProfileModel.findOne({
+      userId: new Types.ObjectId(userId),
+    });
+    if (!profile) {
+      throw new NotFoundException('Profile not found');
+    }
+    return profile;
   }
 
   async updateProfile(
-    userId: Types.ObjectId,
+    userId: string,
     updateData: Partial<UserProfile>,
   ): Promise<UserProfile> {
-    return this.userProfileModel
-      .findOneAndUpdate({ userId }, updateData, { new: true })
-      .exec();
+    const profile = await this.userProfileModel.findOneAndUpdate(
+      { userId: new Types.ObjectId(userId) },
+      { $set: updateData },
+      { new: true },
+    );
+    if (!profile) {
+      throw new NotFoundException('Profile not found');
+    }
+    return profile;
   }
 
   async updateStatistics(
@@ -41,11 +52,17 @@ export class UserProfileService {
   }
 
   async updatePreferences(
-    userId: Types.ObjectId,
-    preferences: Partial<UserProfile['preferences']>,
+    userId: string,
+    preferences: any,
   ): Promise<UserProfile> {
-    return this.userProfileModel
-      .findOneAndUpdate({ userId }, { $set: { preferences } }, { new: true })
-      .exec();
+    const profile = await this.userProfileModel.findOneAndUpdate(
+      { userId: new Types.ObjectId(userId) },
+      { $set: { preferences } },
+      { new: true },
+    );
+    if (!profile) {
+      throw new NotFoundException('Profile not found');
+    }
+    return profile;
   }
 }
